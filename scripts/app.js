@@ -11,6 +11,11 @@
         addDialog: document.querySelector('.dialog-container')
     };
 
+    //Use IndexedDB to save data 
+    localforage.config({
+        driver: localforage.IndexedDB,
+        name: 'Taller1-localStorage'
+    });
 
     /*****************************************************************************
      *
@@ -39,7 +44,8 @@
             app.selectedTimetables = [];
         }
         app.getSchedule(key, label);
-        app.selectedTimetables.push({key: key, label: label});
+        app.selectedTimetables.push({ key: key, label: label });
+        app.saveSelectedTimeTables();
         app.toggleAddDialog(false);
     });
 
@@ -108,8 +114,6 @@
      * Methods for dealing with the model
      *
      ****************************************************************************/
-
-
     app.getSchedule = function (key, label) {
         var url = 'https://api-ratp.pierre-grimaud.fr/v3/schedules/' + key;
 
@@ -147,7 +151,6 @@
      * or when the user has not saved any stations. See startup code for more
      * discussion.
      */
-
     var initialStationTimetable = {
 
         key: 'metros/1/bastille/A',
@@ -164,45 +167,35 @@
                 message: '5 mn'
             }
         ]
-
-
     };
 
-    app.saveTimeTables = function(){
-        var selectedTables = JSON.stringify(app.selectedTimetables);
-        localStorage.selectedTimetables = selectedTables;
-    }
+    // Save list time tables
+    app.saveSelectedTimeTables = function () {
+        app.selectedTimetables.forEach(function (timeTable) {
+            localforage.setItem(timeTable.key, timeTable.label).then(function (value) {
+                console.log(timeTable.key +" saved successfully");
+            }).catch(function(err) {
+                console.log(timeTable.key +" can't be saved");
+            });
+            console.log("test");
+        });
+    };
 
-    /************************************************************************
-     *
-     * Code required to start the app
-     *
-     * NOTE: To simplify this codelab, we've used localStorage.
-     *   localStorage is a synchronous API and has serious performance
-     *   implications. It should not be used in production applications!
-     *   Instead, check out IDB (https://www.npmjs.com/package/idb) or
-     *   SimpleDB (https://gist.github.com/inexorabletash/c8069c042b734519680c)
-     ************************************************************************/
+    localforage.length().then(function(numberOfKeys) {
+        if(numberOfKeys>0){
+            localforage.iterate(function(value, key, iterationNumber) {
+                app.getSchedule(key, value);
+            });
+        }else{
+            app.getSchedule(initialStationTimetable.key, initialStationTimetable.label);
+            app.selectedTimetables = [{ key: initialStationTimetable.key, label: initialStationTimetable.label }];
+            app.saveSelectedTimeTables();
+        }
 
-    app.selectedTimetables = localStorage.selectedTimetables;
-  if (app.selectedTimetables) {
-    app.selectedTimetables = JSON.parse(app.selectedTimetables);
-    app.selectedTimetables.forEach(function(time) {
-      app.getSchedule(time.key, time.label);
+    }).catch(function(err) {
+        // This code runs if there were any errors
+        console.log(err);
     });
-  } else {
-    /* The user is using the app for the first time, or the user has not
-     * saved any table times, so show the user some fake data. A real app in this
-     * scenario could guess the user's location via IP lookup and then inject
-     * that data into the page.
-     */
-    app.getSchedule(initialStationTimetable.key, initialStationTimetable.label);
-    app.selectedTimetables = [
-        {key: initialStationTimetable.key, label: initialStationTimetable.label}
-    ];
-    app.saveTimeTables();
-  }
-
-
+  
    
 })();
