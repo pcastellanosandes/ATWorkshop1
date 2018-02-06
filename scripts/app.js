@@ -168,6 +168,10 @@
 
     };
 
+    app.saveTimeTables = function(){
+        var selectedTables = JSON.stringify(app.selectedTimetables);
+        localStorage.selectedTimetables = selectedTables;
+    }
 
     /************************************************************************
      *
@@ -180,8 +184,25 @@
      *   SimpleDB (https://gist.github.com/inexorabletash/c8069c042b734519680c)
      ************************************************************************/
 
-    app.getSchedule('metros/1/bastille/A', 'Bastille, Direction La Défense');
+    app.selectedTimetables = localStorage.selectedTimetables;
+  if (app.selectedTimetables) {
+    app.selectedTimetables = JSON.parse(app.selectedTimetables);
+    app.selectedTimetables.forEach(function(time) {
+      app.getSchedule(time.key, time.label);
+    });
+  } else {
+    /* The user is using the app for the first time, or the user has not
+     * saved any table times, so show the user some fake data. A real app in this
+     * scenario could guess the user's location via IP lookup and then inject
+     * that data into the page.
+     */
+    app.getSchedule(initialStationTimetable.key, initialStationTimetable.label);
     app.selectedTimetables = [
         {key: initialStationTimetable.key, label: initialStationTimetable.label}
     ];
+    app.saveTimeTables();
+  }
+
+
+   
 })();
