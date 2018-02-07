@@ -116,20 +116,6 @@
      ****************************************************************************/
     app.getSchedule = function (key, label) {
         var url = 'https://api-ratp.pierre-grimaud.fr/v3/schedules/' + key;
-        
-        if ('caches' in window) {
-            caches.match(url).then(function (response) {
-                if (response) {
-                    response.json().then(function updateFromCache(json) {
-                        var result = json.result;
-                        result.key = key;
-                        result.label = label;
-                        result.created = json._metadata.date;
-                        app.updateTimetableCard(result);
-                    });
-                }
-            });
-        }
 
         var request = new XMLHttpRequest();
         request.onreadystatechange = function () {
