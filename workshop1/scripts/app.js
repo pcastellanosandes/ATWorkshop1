@@ -11,7 +11,7 @@
         addDialog: document.querySelector('.dialog-container')
     };
 
-    //Use IndexedDB to save data 
+    //Use IndexedDB to save data
     localforage.config({
         driver: localforage.IndexedDB,
         name: 'Taller1-localStorage'
@@ -103,6 +103,7 @@
         }
 
         if (app.isLoading) {
+            window.cardLoadTime = performance.now();
             app.spinner.setAttribute('hidden', true);
             app.container.removeAttribute('hidden');
             app.isLoading = false;
@@ -204,6 +205,6 @@
                  .register('./service-worker.js')
                  .then(function() { console.log('Service Worker Registered'); });
       }
-  
-   
+
+
 })();
