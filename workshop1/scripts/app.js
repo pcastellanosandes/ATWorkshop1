@@ -122,6 +122,7 @@
         request.onreadystatechange = function () {
             if (request.readyState === XMLHttpRequest.DONE) {
                 if (request.status === 200) {
+                   window.APIRequestTime = performance.now();
                     var response = JSON.parse(request.response);
                     var result = {};
                     result.key = key;
