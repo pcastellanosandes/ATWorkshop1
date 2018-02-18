@@ -18,9 +18,7 @@ class ApiTimeAudit extends Audit {
 
     static audit(artifacts) {
         const loadedTime = artifacts.ApiRequest;
-
         const belowThreshold = loadedTime <= MAX_REQUEST_TIME;
-
         return {
             rawValue: loadedTime,
             score: belowThreshold
